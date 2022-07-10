@@ -46,6 +46,10 @@ header a:hover {
     margin-top: 30px;
 }
 
+.city {
+	text-align: center;
+}
+
 .widget {
 	position: absolute;
 	top: 50%;
@@ -67,7 +71,7 @@ section {
 .widget section.top {
 	height: auto;
 	border-radius: var(--border-radius) var(--border-radius) 0 0;
-	padding: 40px 0;
+	padding-top: 40px;
 	font-weight: 400;
 }
 
@@ -128,8 +132,7 @@ section {
 }
 
 .wind::before {
-	content: "\f050";
-	/* transform: rotate(-45deg); */
+	content: "\f0b1";
 }
 
 .weather_data {
