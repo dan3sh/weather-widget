@@ -1,3 +1,10 @@
 <script>
-  export const city, lat, lon, country;
+  export let name, country;
 </script>
+
+<div class=info>
+  <div class="city">
+    {name}<br>
+    {country}
+  </div>
+</div>

@@ -1,8 +1,13 @@
 <script>
   import { getJSON } from "../lib/async"
   import { onMount } from "svelte"
+  import Weather from "../components/Weather.svelte"
+import Place from "../components/Place.svelte";
 
 let lat, lon;
+
+let datetime = new Date();
+datetime.setSeconds(0,0);
 
 async function getPosition() {
   if (navigator.geolocation) {
@@ -16,7 +21,7 @@ async function getPosition() {
 function getPlace() {
   return getJSON(`/api/resolve-location?lat=${lat}&lon=${lon}`).then(
   result => {
-    console.log("place", result);
+    // console.log("place", result);
     const place = {
       name: result.name,
       country: result.country,
@@ -25,6 +30,25 @@ function getPlace() {
   }
   );
 }
+
+function getWeather() {
+    return getJSON(`/api/weather?lat=${lat}&lon=${lon}`).then(
+      results => {
+        // console.log("weather", results);
+        const weather = {
+          temperature: `${results.temp} &degC`,
+          icon: results.weather[0].icon,
+          description: results.weather[0].description,
+          uvi: results.uvi,
+          humidity: `${results.humidity} %`,
+          pressure: `${results.pressure} hPa`,
+          wind_deg: results.wind_deg,
+          wind_speed: `${results.wind_speed} km/h`,
+        };
+        return weather;
+      }
+    );
+  }
 
 onMount(async () => {
       getPosition();
@@ -37,55 +61,29 @@ onMount(async () => {
 
 <article class="widget">
   <section class="top">
-      <div class="info">20.06.2022. @ 14:43h</div>
-      {#if (typeof(lat) == 'undefined')}
-      <button on:click={getPosition}>Enable location services</button>
-      <p>Location services must be enabled for this app to work.<br>
-        Edit the permission in your browser and click on the button or reload the page.</p>
-      {:else}
-        <div class="weather_icon">
-            <i class="wi wi-day-cloudy"></i>
-        </div>
-        {#await getPlace()}
-        <span>Looking up your location...</span>
-        {:then place}
-        <div class=info>
-          <div class="city">
-            {place.name},<br>
-            {place.country}
-          </div>
-        </div>
-        {/await}
-      {/if}
+    <div class="info">{datetime.toLocaleString()
+    .replace(/\//g, ".")
+    .replace(/, /, " @ ")
+    .replace(/\:00/g,"h")}</div>
+    {#if (typeof(lat) == 'undefined')}
+    <button on:click={getPosition}>Enable location services</button>
+    <p>Location services must be enabled for this app to work.<br>
+      Edit the permission in your browser and click on the button or reload the page.</p>
+    {:else}
+    {#await getPlace()}
+    <span>Looking up your location...</span>
+    {:then place}
+    <Place {...place} />
+    {/await}
+  {/if}
   </section>
-  <section class="bottom">
-      <div class="weather_data">
-          <div>
-              <div class="weathericons air_temperature"></div>
-                  <span>Air 28.7 &deg;C</span>
-          </div>
-          <div>
-              <div class="weathericons uv_index"></div>
-                  <span>UVI 3</span>
-          </div>
-          <div>
-              <div class="weathericons pressure"></div>
-                  <span>Pressure 1018 hPa</span>
-          </div>
-          <div>
-              <div class="weathericons humidity"></div>
-                  <span>Humidity 30 %</span>
-          </div>
-          <div>
-              <div class="weathericons wind"></div>
-                  <span>Wind NW 12 km/h</span>
-          </div>
-          <div>
-              <div class="weathericons sea_temperature"></div>
-                  <span>Sea 22.3 &deg;C</span>
-          </div>
-      </div>
-  </section>
+  {#if (typeof(lat) != 'undefined')}
+    {#await getWeather()}
+      <p>Loading weather data...</p>
+    {:then weather}
+      <Weather {...weather} />
+    {/await}
+  {/if}
 </article>
 <footer>
 </footer>
